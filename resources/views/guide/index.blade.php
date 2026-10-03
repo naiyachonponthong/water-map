@@ -1,0 +1,30 @@
+@extends($layout)
+@section('title', 'คู่มือการใช้งาน FloodThai')
+@section('description', 'คู่มือการใช้งานแบบละเอียดสำหรับประชาชน เจ้าหน้าที่ และผู้ดูแลระบบ แผนที่ระดับน้ำ แจ้งเหตุ ติดตามงานและติดตั้ง')
+@section('body-class', 'guide-body')
+@push('head')
+    @if($layout === 'layouts.public')
+        <link rel="stylesheet" href="{{ asset('css/public-home.css') }}?v={{ filemtime(public_path('css/public-home.css')) }}">
+        <link rel="stylesheet" href="{{ asset('css/home-dashboard.css') }}?v={{ filemtime(public_path('css/home-dashboard.css')) }}">
+    @endif
+    <link rel="stylesheet" href="{{ asset('css/usage-guide.css') }}?v={{ filemtime(public_path('css/usage-guide.css')) }}">
+@endpush
+@section('content')
+@if($layout === 'layouts.public') @include('partials.public-home-nav') @endif
+<main class="ug-page" id="usageGuide">
+    <header class="ug-hero"><div><span class="ug-kicker"><i class="bi bi-book" aria-hidden="true"></i> FLOODTHAI KNOWLEDGE CENTER</span><h1>คู่มือการใช้งาน<br><em>ทุกขั้นตอน อ่านเข้าใจง่าย</em></h1><p>ตั้งแต่ดูสถานการณ์ในพื้นที่ แจ้งระดับน้ำ ขอความช่วยเหลือ<br class="d-none d-lg-block"> ไปจนถึงการทำงานของเจ้าหน้าที่และดูแลระบบ</p><div class="ug-hero-badges"><span><i class="bi bi-journal-check" aria-hidden="true"></i> {{ count($sections) }} หัวข้อ</span><span><i class="bi bi-people" aria-hidden="true"></i> 3 กลุ่มผู้ใช้งาน</span><span><i class="bi bi-search" aria-hidden="true"></i> ค้นหาได้ทันที</span></div></div><div class="ug-hero-aside"><i class="bi bi-compass" aria-hidden="true"></i><strong>เริ่มจากเรื่องที่คุณต้องการ</strong><p>เลือกกลุ่มผู้ใช้งาน หรือค้นหาคำ เช่น “ตลิ่ง”, “GPS”, “รับงาน”</p><a href="#ugTools">เริ่มอ่านคู่มือ <i class="bi bi-arrow-down" aria-hidden="true"></i></a></div></header>
+    <section class="ug-onboarding" aria-label="ขั้นตอนเริ่มใช้คู่มือ"><div><b>01</b><span><strong>เลือกบทบาท</strong><small>ประชาชน เจ้าหน้าที่ หรือผู้ดูแล</small></span></div><div><b>02</b><span><strong>ค้นหาเรื่องที่ต้องการ</strong><small>ใช้สารบัญหรือคำค้น</small></span></div><div><b>03</b><span><strong>ทำตามทีละขั้น</strong><small>เปิดรายละเอียดและไปหน้าที่เกี่ยวข้อง</small></span></div></section>
+    <div class="ug-toolbar" id="ugTools"><label class="ug-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" id="guideSearch" aria-label="ค้นหาในคู่มือ" placeholder="ค้นหาหัวข้อหรือคำ เช่น ระดับน้ำ ติดตามเคส GPS"></label><button type="button" id="guidePrint"><i class="bi bi-printer" aria-hidden="true"></i> พิมพ์คู่มือทั้งหมด</button></div>
+    <div class="ug-filters" role="group" aria-label="เลือกกลุ่มผู้ใช้งาน">@foreach($audiences as $key => $label)<button type="button" data-guide-audience="{{ $key }}" aria-pressed="{{ $key === 'all' ? 'true' : 'false' }}">{{ $label }}</button>@endforeach<span id="guideCount" role="status">{{ count($sections) }} หัวข้อ</span><button type="button" class="ug-expand" id="guideExpand">เปิดรายละเอียดทั้งหมด</button></div>
+    <div class="ug-workspace"><aside class="ug-sidebar"><div class="ug-toc-head"><i class="bi bi-list-ul" aria-hidden="true"></i><h2>สารบัญคู่มือ</h2></div><nav aria-label="สารบัญคู่มือ">@foreach($sections as $section)<a href="#{{ $section['id'] }}" data-guide-toc="{{ $section['id'] }}"><i class="bi bi-{{ $section['icon'] }}" aria-hidden="true"></i><span>{{ $section['title'] }}</span></a>@endforeach</nav><div class="ug-toc-note"><i class="bi bi-shield-check" aria-hidden="true"></i><p>คู่มือไม่มีข้อมูลผู้ประสบภัยหรือรหัสบัญชี<br>สิทธิ์ใช้งานจริงขึ้นกับบทบาทของคุณ</p></div></aside>
+        <div class="ug-topics"><div class="ug-important"><i class="bi bi-info-circle" aria-hidden="true"></i><p><b>ก่อนเริ่ม:</b> ไม่พบรายงาน ไม่ได้แปลว่าไม่มีน้ำท่วม · รายงานระดับน้ำไม่ใช่คำขอส่งทีมกู้ภัย · หากต้องการความช่วยเหลือให้ใช้ฟอร์มและเบอร์ติดต่อของจังหวัด</p></div>
+            @foreach($sections as $section)<article class="ug-topic" id="{{ $section['id'] }}" data-guide-section data-audience="{{ $section['audience'] }}"><header><span class="ug-topic-icon"><i class="bi bi-{{ $section['icon'] }}" aria-hidden="true"></i></span><div><small>{{ $audiences[$section['audience']] }} · หัวข้อ {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</small><h2>{{ $section['title'] }}</h2></div></header><p class="ug-intro">{{ $section['intro'] }}</p><details @if($loop->first) open @endif><summary>ขั้นตอนและข้อควรรู้ <span>{{ count($section['steps']) }} ขั้นตอน</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="ug-detail"><ol>@foreach($section['steps'] as $step)<li>{{ $step }}</li>@endforeach</ol>@isset($section['tip'])<div class="ug-tip"><i class="bi bi-lightbulb" aria-hidden="true"></i><p>{{ $section['tip'] }}</p></div>@endisset
+                @isset($section['links'])<div class="ug-topic-links">@foreach($section['links'] as $link)<a href="{{ $province ? route($link['route'], $province).(isset($link['anchor']) ? '#'.$link['anchor'] : '') : route('public.provinces') }}">{{ $province ? $link['label'] : 'เลือกจังหวัดเพื่อใช้งาน' }} <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>@endforeach</div>@endisset
+            </div></details></article>@endforeach
+            <div class="ug-empty" id="guideEmpty" hidden><i class="bi bi-search" aria-hidden="true"></i><h2>ยังไม่พบหัวข้อที่ตรงกัน</h2><p>ลองใช้คำสั้นลง หรือเลือก “ทุกหัวข้อ”</p><button type="button" id="guideReset">ล้างคำค้นและตัวกรอง</button></div>
+        </div>
+    </div>
+    <footer class="ug-end"><div><i class="bi bi-chat-heart" aria-hidden="true"></i><h2>ใช้ข้อมูลให้ถูก เข้าใจสถานการณ์ให้ชัด</h2><p>ข้อมูลในระบบเป็นเครื่องมือประกอบการทำงาน ไม่แทนการตรวจสถานการณ์และการติดต่อหน่วยงาน</p></div><a href="{{ $province ? route('public.province', $province) : route('public.provinces') }}">กลับหน้าจังหวัด <i class="bi bi-arrow-right" aria-hidden="true"></i></a><a href="#usageGuide" class="ug-back-top">กลับด้านบน</a></footer>
+</main>
+@endsection
+@push('scripts')<script src="{{ asset('js/usage-guide.js') }}?v={{ filemtime(public_path('js/usage-guide.js')) }}" defer></script>@endpush

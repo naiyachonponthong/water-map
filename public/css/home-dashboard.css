@@ -1,0 +1,102 @@
+/* Province homepage: a compact, wide-screen public information dashboard. */
+.fh-home-dashboard { --bs-primary-rgb: 21, 128, 159; --bs-link-color: #187d9e; --bs-link-hover-color: #105c79; }
+.fh-home-dashboard .fh-container { width: calc(100% - 72px); max-width: 1600px; }
+.fh-home-dashboard .fh-nav-inner { min-height: 78px; }
+.fh-home-dashboard .fh-nav-links { gap: 18px; }
+.fh-desktop-nav { display: flex; gap: 24px; margin-right: 8px; }
+.fh-desktop-nav a { font-size: 13px; color: #5b7588; }
+.fh-desktop-nav a:hover { color: #168baf; }
+.fh-province-control { display: flex; align-items: center; gap: 8px; background: #f4f8fb; border: 1px solid #dfe8ee; border-radius: 11px; padding: 10px 12px; }
+.fh-province-control > i { color: #43869e; }
+.fh-province-control select { background: transparent; border: 0; color: #416377; width: 140px; font-size: 13px; cursor: pointer; }
+.fh-home-dashboard .fh-staff { padding: 10px 14px; font-size: 12px; }
+.fh-hero-status { display: flex; align-items: center; gap: 14px; font-size: 11px; margin-bottom: 18px; }
+.fh-hero-status > span { color: #bcd5df; background: #ffffff0c; padding: 7px 10px; border-radius: 20px; border: 1px solid #ffffff17; }
+.fh-hero-status > span i { font-size: 6px; margin-right: 5px; color: #8ac7d2; }
+.fh-hero-status > span.is-open i { color: #71dfac; }
+.fh-hero-status a { color: #b7d8e4; }
+.fh-home-dashboard .fh-hero { padding: 34px 0 46px; background: radial-gradient(ellipse at 82% 28%, #286c7c66, transparent 65%), #10354b; }
+.fh-home-dashboard .fh-hero-grid { grid-template-columns: 1.08fr .92fr; gap: 48px; }
+.fh-home-dashboard .fh-hero-copy { padding: 10px 0; }
+.fh-home-dashboard .fh-eyebrow { margin-bottom: 14px; font-size: 11px; }
+.fh-home-dashboard .fh-hero h1 { font-size: clamp(32px, 2.8vw, 48px); line-height: 1.45; margin-bottom: 16px; }
+.fh-home-dashboard .fh-hero-copy > p { font-size: 14px; line-height: 1.9; margin-bottom: 22px; }
+.fh-home-dashboard .fh-art { aspect-ratio: 1.7; border-radius: 22px; }
+.fh-home-dashboard .fh-art-note { padding: 10px 14px; bottom: 18px; left: 18px; }
+.fh-home-dashboard .fh-hero-footnote { margin-top: 18px; font-size: 10px; }
+.fh-home-dashboard .fh-button { min-height: 46px; font-size: 13px; padding: 11px 16px; border-radius: 10px; }
+.fh-home-dashboard .fh-main { padding: 28px 0 70px; }
+.fh-home-dashboard .fh-section-heading { margin-bottom: 18px; }
+.fh-home-dashboard .fh-section-heading h2 { font-size: 22px; }
+.fh-home-dashboard .fh-services { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+.fh-home-dashboard .fh-services > a { border-radius: 14px; padding: 18px 14px; gap: 10px; }
+.fh-home-dashboard .fh-services strong { font-size: 15px; }
+.fh-home-dashboard .fh-services small { font-size: 10px; }
+.fh-home-dashboard .fh-service-icon { width: 38px; height: 38px; font-size: 21px; border-radius: 11px; }
+.fh-service-icon.violet { background: #eef0fc; color: #707eb8; }
+.fh-home-dashboard .fh-content-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; }
+.fh-home-dashboard .fh-content-grid > .card { grid-column: span 4; border-radius: 17px; box-shadow: 0 4px 20px #143e5604; }
+.fh-home-dashboard .fh-content-grid > .pw-home-card { grid-column: span 8; }
+.fh-home-dashboard .fh-content-grid > .fh-status-card { grid-column: span 4; }
+.fh-home-dashboard .fh-content-grid > .fh-resources-card, .fh-home-dashboard .fh-content-grid > .alert-bar { grid-column: 1 / -1; }
+.fh-home-dashboard .fh-content-grid > .btn { grid-column: 1 / -1; }
+.fh-home-dashboard .fh-content-grid .card-header { font-size: 14px; padding: 18px 20px; }
+.fh-home-dashboard .fh-content-grid .card-body { padding: 20px; }
+.fh-home-dashboard .fh-status-card { background: linear-gradient(130deg, #e9f4f8, #f2f8fb); border-color: #d9e9f0; height: 100%; }
+.fh-home-dashboard .fh-status-card .card-body { height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 22px; }
+.fh-center-icon { background: #d8edf3; color: #41889e; border-radius: 12px; width: 40px; height: 40px; display: grid; place-items: center; font-size: 21px; margin-bottom: 7px; }
+.fh-center-contact { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #448199; margin-top: auto; padding-top: 12px; }
+.fh-home-dashboard .pw-home-card .card-body { column-gap: 26px; grid-template-columns: 1.05fr 1fr; min-height: 200px; }
+.fh-home-dashboard .pw-home-summary strong { font-size: 24px; }
+.fh-home-dashboard .pw-home-summary p { font-size: 11px; line-height: 1.8; }
+.fh-home-dashboard .pw-weather-icon { width: 40px; height: 40px; font-size: 22px; border-radius: 12px; }
+.fh-home-dashboard .pw-detail-link { margin-left: 55px; font-size: 11px; }
+.fh-home-dashboard .pw-badge { display: inline-flex; padding: 4px 9px; }
+.fh-home-dashboard .pw-source { font-size: 9px; }
+.fh-home-dashboard .text-primary { color: #268aa8 !important; }
+.fh-home-dashboard .fh-services > a:hover { transform: translateY(-3px); }
+.fh-home-dashboard .fh-footer { margin-top: 26px; }
+@media (max-width: 1300px) { .fh-desktop-nav { display: none; } .fh-home-dashboard .fh-services > a > .bi { display: none; } .fh-home-dashboard .fh-art { aspect-ratio: 1.3; } }
+@media (max-width: 1000px) {
+    .fh-home-dashboard .fh-container { width: calc(100% - 40px); }
+    .fh-home-dashboard .fh-hero-grid { gap: 24px; }
+    .fh-home-dashboard .fh-services { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .fh-home-dashboard .fh-content-grid > .card { grid-column: span 6; }
+    .fh-home-dashboard .fh-content-grid > .pw-home-card { grid-column: 1 / -1; }
+    .fh-home-dashboard .fh-content-grid > .fh-status-card { grid-column: 1 / -1; }
+    .fh-home-dashboard .fh-status-card .card-body { display: block; }
+    .fh-center-icon { display: none; }
+    .fh-home-dashboard .fh-art { aspect-ratio: 1; }
+}
+@media (max-width: 640px) {
+    .fh-home-dashboard .fh-container { width: calc(100% - 32px); }
+    .fh-home-dashboard .fh-nav-inner { min-height: 70px; }
+    .fh-home-dashboard .fh-nav-links { gap: 7px; }
+    .fh-province-control { padding: 8px 6px; gap: 3px; border-radius: 9px; }
+    .fh-province-control select { width: 75px; font-size: 10px; }
+    .fh-province-control > i { font-size: 12px; }
+    .fh-home-dashboard .fh-staff { padding: 8px; }
+    .fh-home-dashboard .fh-brand small { display: none; }
+    .fh-home-dashboard .fh-brand strong { font-size: 12px; }
+    .fh-home-dashboard .fh-brand-icon { width: 30px; height: 30px; font-size: 18px; }
+    .fh-home-dashboard .fh-hero { padding: 24px 0 30px; }
+    .fh-hero-status { font-size: 9px; gap: 8px; flex-wrap: wrap; margin-bottom: 13px; }
+    .fh-home-dashboard .fh-hero-grid { grid-template-columns: 1fr; gap: 20px; }
+    .fh-home-dashboard .fh-hero h1 { font-size: 30px; }
+    .fh-home-dashboard .fh-hero-copy > p { font-size: 12px; }
+    .fh-home-dashboard .fh-art { aspect-ratio: 1.75; }
+    .fh-home-dashboard .fh-button { font-size: 11px; padding: 10px 8px; }
+    .fh-home-dashboard .fh-main { padding-top: 22px; padding-bottom: 100px; }
+    .fh-home-dashboard .fh-section-heading h2 { font-size: 18px; }
+    .fh-home-dashboard .fh-services { grid-template-columns: 1fr 1fr; gap: 9px; }
+    .fh-home-dashboard .fh-services > a { padding: 14px; }
+    .fh-home-dashboard .fh-services > a:last-child { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+    .fh-home-dashboard .fh-content-grid { grid-template-columns: 1fr; gap: 14px; }
+    .fh-home-dashboard .fh-content-grid > .card { grid-column: 1; }
+    .fh-home-dashboard .pw-home-card .card-body { display: block; min-height: 0; }
+    .fh-home-dashboard .pw-home-summary strong { font-size: 21px; }
+    .fh-home-dashboard .pw-detail-link { margin-left: 50px; }
+    .fh-home-dashboard .fh-status-card .card-body { padding: 18px; }
+    .fh-home-dashboard .pw-home-card .card-header { padding: 16px; font-size: 13px; }
+    .fh-home-dashboard .pw-badge { font-size: 9px; }
+}

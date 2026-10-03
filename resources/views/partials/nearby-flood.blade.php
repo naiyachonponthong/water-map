@@ -1,0 +1,9 @@
+<section class="wn-card" data-nearby-flood data-context-url="{{ route('public.water.context', $province, false) }}" data-reports-url="{{ route('public.water.reports', $province, false) }}" data-map-url="{{ route('public.water-map', $province, false) }}">
+    <div class="wn-heading"><span class="wn-icon"><i class="bi bi-house-check" aria-hidden="true"></i></span><div><span class="wn-kicker">เช็กพื้นที่ใกล้ตัว</span><h2>น้ำท่วมใกล้บ้านฉันไหม?</h2></div><span class="wn-window">12 ชม. ล่าสุด</span></div>
+    <p class="wn-intro">ดูรายงานน้ำท่วมในพื้นที่ที่คุณสนใจ ไม่ต้องสมัครสมาชิก</p>
+    <div class="wn-actions"><button type="button" data-near-gps><i class="bi bi-crosshair" aria-hidden="true"></i> ตรวจใกล้ฉัน</button><button type="button" data-near-manual aria-expanded="false"><i class="bi bi-geo-alt" aria-hidden="true"></i> เลือก{{ $province->code === '10' ? 'แขวง' : 'ตำบล' }}</button></div>
+    <div class="wn-selectors" data-near-selectors hidden><label><span>{{ $province->code === '10' ? 'เขต' : 'อำเภอ' }}</span><select data-near-district aria-label="เลือกอำเภอหรือเขต" disabled><option value="">กำลังโหลดพื้นที่…</option></select></label><label><span>{{ $province->code === '10' ? 'แขวง' : 'ตำบล' }}</span><select data-near-subdistrict aria-label="เลือกตำบลหรือแขวง" disabled><option value="">เลือกอำเภอหรือเขตก่อน</option></select></label></div>
+    <p class="wn-privacy"><i class="bi bi-shield-lock" aria-hidden="true"></i> GPS คำนวณในเบราว์เซอร์ ไม่ส่งพิกัดเข้า API ของระบบ</p>
+    <div class="wn-result" data-near-result role="status" aria-live="polite">เลือกตำแหน่งเพื่อดูรายงาน · ไม่พบรายงานไม่ได้แปลว่าปลอดภัย</div>
+    <a class="wn-map-link" data-near-map href="{{ route('public.water-map', $province) }}#nearby"><i class="bi bi-map" aria-hidden="true"></i> เปิดแผนที่ระดับน้ำและรายงานในพื้นที่ <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+</section>

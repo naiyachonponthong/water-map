@@ -1,0 +1,4 @@
+# crontab -u www-data -e
+* * * * * cd /var/www/floodthai && php artisan schedule:run >> /dev/null 2>&1
+# สำรองฐานข้อมูลทุก 3 ชั่วโมงช่วงเกิดเหตุ (ปกติวันละครั้งก็พอ)
+15 */3 * * * /var/www/floodthai/deploy/backup.sh >> /var/www/floodthai/storage/logs/backup.log 2>&1

@@ -1,0 +1,62 @@
+/* แอปภาคสนาม: ใช้กลางแดด มือเปียก ปุ่มใหญ่ ตัวหนังสือชัด */
+body.field { background: var(--sb-bg); min-height: 100vh; padding-bottom: calc(76px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }
+.f-empty { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; background: #0e2233; color: #fff; }
+.f-head { position: sticky; top: 0; z-index: 1030; display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; background: #0e2233; color: #fff; }
+.f-team { font-weight: 700; font-size: 1.05rem; }
+.f-status { display: inline-flex; align-items: center; gap: 6px; border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 999px; padding: 3px 10px; font-size: .85rem; margin-top: 2px; }
+.f-status .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.f-net { font-size: .8rem; padding: 4px 10px; border-radius: 999px; background: rgba(34,197,94,.18); color: #86efac; white-space: nowrap; }
+.f-net.off { background: rgba(239,68,68,.2); color: #fca5a5; }
+.f-net.sync { background: rgba(245,158,11,.2); color: #fcd34d; }
+.f-banner { padding: 10px 14px; background: #b91c1c; color: #fff; font-weight: 600; font-size: .92rem; }
+.f-banner.warn { background: #b45309; }
+.f-banner.ack { background: #1d4ed8; }
+.f-main { padding: 12px; }
+.f-section-title { font-weight: 700; font-size: .95rem; margin: 6px 2px 8px; display: flex; align-items: center; gap: 6px; }
+.f-card { background: #fff; border-radius: 18px; box-shadow: var(--sb-shadow); padding: 14px; margin-bottom: 12px; border-left: 6px solid var(--c, #ccc); }
+.f-card.offer { box-shadow: 0 0 0 3px #f59e0b, var(--sb-shadow-lift); }
+.f-card .f-name { font-size: 1.15rem; font-weight: 700; }
+.f-card .f-meta { color: var(--sb-muted); font-size: .88rem; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.f-card .f-note { background: #f8f9fb; border-radius: 10px; padding: 8px 10px; font-size: .9rem; white-space: pre-line; margin-top: 8px; }
+.f-card .f-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.f-stop { width: 30px; height: 30px; border-radius: 50%; background: #0e2233; color: #fff; display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
+.f-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.f-actions .btn { padding: .75rem .5rem; font-size: 1rem; border-radius: 14px; }
+.f-actions .wide { grid-column: 1 / -1; }
+.f-big { padding: 1rem !important; font-size: 1.1rem !important; }
+.f-pending { font-size: .78rem; color: #b45309; margin-top: 6px; }
+.f-route { background: #fff; border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; box-shadow: var(--sb-shadow); }
+.f-map { height: calc(100vh - 170px); border-radius: 16px; overflow: hidden; }
+.f-legend { font-size: .8rem; color: var(--sb-muted); padding: 6px 2px; }
+.f-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1040; display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid var(--sb-border); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+.f-nav button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--sb-muted); font-size: 11px; position: relative; padding: 4px 0; }
+.f-nav button .bi { font-size: 1.35rem; }
+.f-nav button.active { color: var(--sb-primary); font-weight: 600; }
+.f-nav button.sos { color: #dc2626; }
+.f-badge { position: absolute; top: 0; right: calc(50% - 22px); min-width: 18px; height: 18px; border-radius: 999px; background: #dc2626; color: #fff; font-size: 11px; display: grid; place-items: center; padding: 0 5px; }
+.f-sheet { border-radius: 22px; }
+.f-sheet .modal-header { background: #0e2233; color: #fff; border-radius: 22px 22px 0 0; }
+.f-choice { display: grid; gap: 8px; }
+.f-choice label { display: flex; align-items: center; gap: 10px; padding: .8rem 1rem; border: 2px solid var(--sb-border); border-radius: 14px; font-weight: 500; }
+.f-choice input { width: 20px; height: 20px; accent-color: var(--sb-primary); }
+.f-choice label:has(input:checked) { border-color: var(--sb-primary); background: var(--sb-primary-50); }
+#tabSos { background: #0e2233; color: #fff; margin: -12px; min-height: calc(100vh - 140px); padding: 18px 16px; }
+.sos-wrap { max-width: 420px; margin: 0 auto; text-align: center; }
+.sos-kinds { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 18px; }
+.sos-kinds input { position: absolute; opacity: 0; }
+.sos-kinds span { display: inline-block; padding: .5rem .9rem; border-radius: 999px; border: 2px solid rgba(255,255,255,.25); font-size: .9rem; }
+.sos-kinds input:checked + span { background: #dc2626; border-color: #dc2626; }
+.sos-btn { position: relative; width: 210px; height: 210px; border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 30%, #f87171, #b91c1c 70%); color: #fff; font-size: 3rem; font-weight: 800; letter-spacing: .05em; box-shadow: 0 0 0 10px rgba(220,38,38,.2), 0 18px 40px rgba(0,0,0,.4); user-select: none; -webkit-user-select: none; touch-action: none; }
+.sos-btn:active { transform: scale(.97); }
+.sos-btn svg { position: absolute; inset: -14px; width: calc(100% + 28px); height: calc(100% + 28px); transform: rotate(-90deg); pointer-events: none; }
+.sos-btn circle { fill: none; stroke: #fff; stroke-width: 5; stroke-dasharray: 352; stroke-dashoffset: 352; stroke-linecap: round; }
+.sos-btn span { position: relative; }
+body.field .flash-wrap { top: auto; bottom: calc(86px + env(safe-area-inset-bottom)); left: 12px; right: 12px; max-width: none; }
+
+/* ครัวเรือนเปราะบาง / จุดเสี่ยง */
+.f-hh { margin-top: .5rem; padding: .55rem .7rem; border-radius: 12px; background: rgba(220, 38, 38, .12); border: 1px solid rgba(220, 38, 38, .35); }
+.f-risk { display: flex; gap: .6rem; align-items: flex-start; padding: .6rem .75rem; margin-bottom: .5rem; border-radius: 12px; background: #7f1d1d; color: #fff; }
+.f-risk > i { font-size: 1.2rem; margin-top: .1rem; }
+.risk-marker { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); font-size: 12px; }
+.risk-marker.threat { animation: risk-pulse 1.4s ease-in-out infinite; }
+@keyframes risk-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,.6); } 50% { box-shadow: 0 0 0 10px rgba(220,38,38,0); } }

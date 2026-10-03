@@ -1,0 +1,17 @@
+{
+  "name": "ทีมกู้ภัย ศูนย์ช่วยเหลือน้ำท่วม",
+  "short_name": "ทีมกู้ภัย",
+  "description": "รับงาน นำทาง อัปเดตความคืบหน้า และขอ SOS จากหน้างาน",
+  "start_url": "/field",
+  "scope": "/field",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e2233",
+  "theme_color": "#0e2233",
+  "lang": "th",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
