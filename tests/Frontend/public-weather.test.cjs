@@ -22,7 +22,7 @@ class Element {
   focus() { this.focused = true; }
 }
 
-function setup(wide = true) {
+function setup(wide = true, options = {}) {
   const elements = new Map();
   const el = id => { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); };
   const locations = [['trang', 'ตรัง'], ['chiang-mai', 'เชียงใหม่'], ['bangkok', 'กรุงเทพมหานคร']].map(([slug, name]) => ({
@@ -30,21 +30,38 @@ function setup(wide = true) {
     forecastUrl: `/${slug}/weather/forecast.json`, contextUrl: `/${slug}/weather/context.json`, radarUrl: `/${slug}/weather/radar.json`,
   }));
   el('weatherLocations').textContent = JSON.stringify(locations);
+  el('weatherBoundaries').textContent = JSON.stringify({type: 'FeatureCollection', features: []});
+  el('weatherAreas').textContent = JSON.stringify([{code: '9201', name: 'อ.เมืองตรัง', subdistricts: [{code: '920101', name: 'ต.ทับเที่ยง', center: [7.56, 99.61]}]}]);
   el('weatherPage').dataset = { slug: 'trang', lat: '7', lng: '99', hasCenter: '1', radarUrl: locations[0].radarUrl };
   el('forecastDay').select = true;
   el('currentTemperature').textContent = '—';
   const pending = [], historyCalls = [], media = { matches: wide, addEventListener() {} };
-  const document = { title: '', hidden: false, getElementById: el, querySelectorAll: () => [], addEventListener() {} };
+  const documentEvents = {}, windowEvents = {}, timers = new Map(); let timerId = 0;
+  const document = { title: '', hidden: false, getElementById: el, querySelectorAll: () => [], addEventListener: (name, fn) => { documentEvents[name] = fn; } };
+  const mapLayers = new Set(), mapEvents = {};
+  const map = {setView() {return this;}, on(name, fn) {mapEvents[name] = fn;}, hasLayer: layer => mapLayers.has(layer), removeLayer: layer => mapLayers.delete(layer), invalidateSize() {}};
+  class Layer {
+    constructor() {this.events = {}; this.loading = false;}
+    on(name, fn) {this.events[name] = fn; return this;}
+    setOpacity(n) {this.opacity = n; return this;}
+    addTo() {mapLayers.add(this); return this;}
+    bindTooltip() {return this;}
+    isLoading() {return this.loading;}
+  }
+  const radarLayers = [];
+  class RadarLayer extends Layer {constructor() {super(); radarLayers.push(this);}}
   const context = {
-    document, window: { location: { origin: 'http://localhost:8003' }, matchMedia: () => media, addEventListener() {} },
+    document, window: { location: { origin: 'http://localhost:8003' }, matchMedia: query => query.includes('reduced-motion') ? {matches: !!options.reduced} : media, addEventListener: (name, fn) => { windowEvents[name] = fn; } },
     history: { replaceState: (...args) => historyCalls.push(args) },
     URL, AbortController, Intl, Date, Error, TypeError, SyntaxError,
-    setTimeout: () => 1, clearTimeout() {}, requestAnimationFrame: fn => fn(),
+    setTimeout: (fn, delay) => { timers.set(++timerId, {fn, delay}); return timerId; }, clearTimeout: id => timers.delete(id), requestAnimationFrame: fn => fn(),
     fetch: (url, options) => new Promise((resolve, reject) => pending.push({ url, options, resolve: data => resolve({ ok: true, json: async () => data }), reject })),
   };
+  if (options.radar) context.L = {map: () => map, tileLayer: () => new Layer(), circleMarker: () => new Layer(), geoJSON: () => new Layer(), TileLayer: {extend: () => RadarLayer}};
   vm.runInNewContext(source, context);
   const change = slug => { el('weatherProvince').value = slug; el('weatherProvince').emit('change'); };
-  return { el, pending, change, historyCalls, media, document };
+  const runTimer = delay => { const entry = [...timers].find(([,t]) => t.delay === delay); assert.ok(entry, `Missing timer ${delay}`); timers.delete(entry[0]); entry[1].fn(); };
+  return { el, pending, change, historyCalls, media, document, documentEvents, windowEvents, runTimer, radarLayers, mapEvents };
 }
 
 function forecast(temperature) {
@@ -111,4 +128,56 @@ test('network failures show a Thai retry message instead of fabricated weather',
   assert.equal(app.el('forecastRetry').hidden, false);
   assert.equal(app.el('currentTemperature').textContent, '—');
   assert.match(app.el('forecastHours').innerHTML, /ยังไม่มีพยากรณ์/);
+});
+
+function radarData() {
+  const now = Math.floor(Date.now()/1000);
+  return {host: 'https://tilecache.rainviewer.com', frames: [0,1,2].map(i => ({time: now - (2-i)*600, path: `/v2/radar/abcdef00${i}`})), updated_at: new Date().toISOString(), stale: false};
+}
+
+test('radar autoplays, waits for loading tiles, suspends in hidden tabs and respects manual pause', async () => {
+  const app = setup(true, {radar: true});
+  app.pending.find(p => p.url.includes('radar.json')).resolve(radarData()); await settle();
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'true');
+  assert.equal(app.el('radarSlider').value, '2');
+  app.radarLayers[0].loading = true; app.runTimer(1500);
+  assert.equal(app.el('radarSlider').value, '2');
+  app.radarLayers[0].loading = false; app.runTimer(500);
+  assert.equal(app.el('radarSlider').value, '0');
+  app.document.hidden = true; app.documentEvents.visibilitychange();
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'false');
+  app.document.hidden = false; app.documentEvents.visibilitychange();
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'true');
+  app.el('radarPlay').emit('click');
+  app.documentEvents.visibilitychange();
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'false');
+});
+
+test('mobile radar only plays while visible and reduced motion needs manual play', async () => {
+  const app = setup(false, {radar: true});
+  app.pending.find(p => p.url.includes('radar.json')).resolve(radarData()); await settle();
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'false');
+  app.el('radarTab').emit('click');
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'true');
+  app.el('forecastTab').emit('click');
+  assert.equal(app.el('radarPlay').getAttribute('aria-pressed'), 'false');
+  const reduced = setup(true, {radar: true, reduced: true});
+  reduced.pending.find(p => p.url.includes('radar.json')).resolve(radarData()); await settle();
+  assert.equal(reduced.el('radarPlay').getAttribute('aria-pressed'), 'false');
+  reduced.el('radarPlay').emit('click');
+  assert.equal(reduced.el('radarPlay').getAttribute('aria-pressed'), 'true');
+});
+
+test('subdistrict changes request its coordinates via scoped codes and clear earlier weather', async () => {
+  const app = setup();
+  app.pending[0].resolve(forecast(28)); await settle();
+  app.el('weatherDistrict').value = '9201'; app.el('weatherDistrict').emit('change');
+  app.el('weatherSubdistrict').value = '920101'; app.el('weatherSubdistrict').emit('change');
+  assert.equal(app.el('currentTemperature').textContent, '—');
+  const request = app.pending.find(p => p.url.includes('subdistrict=920101'));
+  assert.ok(request); assert.match(request.url, /district=9201/);
+  const data = forecast(25); data.location = {name: 'ต.ทับเที่ยง · อ.เมืองตรัง · ตรัง'};
+  request.resolve(data); await settle();
+  assert.equal(app.el('currentTemperature').textContent, '25');
+  assert.match(app.el('weatherCity').textContent, /ทับเที่ยง/);
 });

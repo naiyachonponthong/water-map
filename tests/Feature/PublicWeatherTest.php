@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Province;
+use App\Support\PublicAreaReference;
 use App\Support\PublicWeatherService;
 use Database\Seeders\ProvinceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -211,5 +212,65 @@ class PublicWeatherTest extends TestCase
             ->assertJsonCount(7, 'days');
         $this->getJson($this->forecastUrl())->assertOk()->assertJsonPath('current.temperature', 28);
         Http::assertSentCount(2);
+    }
+
+    public function test_subdistrict_forecast_uses_reference_coordinates_and_has_its_own_cache(): void
+    {
+        $district = app(PublicAreaReference::class)->areas($this->province)[0];
+        $sub = $district['subdistricts'][0];
+        Http::fake(['api.open-meteo.com/*' => Http::response($this->payload())]);
+        $query = http_build_query(['district' => $district['code'], 'subdistrict' => $sub['code']]);
+        $this->getJson($this->forecastUrl().'?'.$query)->assertOk()
+            ->assertJsonPath('location.scope', 'subdistrict')->assertJsonPath('location.center', $sub['center']);
+        Http::assertSent(fn ($r) => $r['latitude'] == $sub['center'][0] && $r['longitude'] == $sub['center'][1]
+            && $r['models'] === 'best_match' && $r['cell_selection'] === 'land');
+        $this->getJson($this->forecastUrl())->assertOk()->assertJsonPath('location.scope', 'city');
+        $this->getJson($this->forecastUrl().'?'.$query)->assertOk();
+        Http::assertSentCount(2);
+    }
+
+    public function test_invalid_or_other_province_subdistrict_never_fetches_weather(): void
+    {
+        $this->getJson($this->forecastUrl().'?district=1001&subdistrict=100101')->assertStatus(422);
+        $this->getJson($this->forecastUrl().'?subdistrict=920101')->assertStatus(422);
+        Http::assertNothingSent();
+    }
+
+    public function test_rain_windows_preserve_hour_intervals_and_do_not_bridge_missing_values(): void
+    {
+        $data = $this->payload();
+        $data['hourly']['precipitation'] = array_fill(0, 168, 0);
+        $data['hourly']['precipitation'][13] = 1;
+        $data['hourly']['precipitation'][14] = null;
+        $data['hourly']['precipitation'][15] = 2;
+        $data['hourly']['precipitation'][16] = 3;
+        Http::fake(['api.open-meteo.com/*' => Http::response($data)]);
+        $this->getJson($this->forecastUrl())->assertOk()->assertJsonCount(2, 'summary.rain_windows')
+            ->assertJsonPath('summary.rain_windows.0.from', '2026-10-03T12:00:00+07:00')
+            ->assertJsonPath('summary.rain_windows.0.to', '2026-10-03T13:00:00+07:00')
+            ->assertJsonPath('summary.rain_windows.1.rain_mm', 5)
+            ->assertJsonPath('summary.rain_hours', null)->assertJsonPath('summary.max_hour_mm', null);
+    }
+
+    public function test_expired_current_model_is_not_shown_as_current_temperature(): void
+    {
+        $data = $this->payload();
+        $data['current']['time'] = '2026-10-03T10:00';
+        Http::fake(['api.open-meteo.com/*' => Http::response($data)]);
+        $this->getJson($this->forecastUrl())->assertOk()->assertJsonPath('current_stale', true)
+            ->assertJsonPath('current.temperature', null)->assertJsonPath('current.humidity', null)
+            ->assertJsonPath('summary.rain_mm', 12);
+    }
+
+    public function test_radar_rejects_future_and_obsolete_frames(): void
+    {
+        $now = now()->timestamp;
+        Http::fake(['api.rainviewer.com/*' => Http::response(['host' => 'https://tilecache.rainviewer.com', 'radar' => ['past' => [
+            ['time' => $now - 14400, 'path' => '/v2/radar/abcdef012'],
+            ['time' => $now + 60, 'path' => '/v2/radar/abcdef013'],
+            ['time' => $now - 600, 'path' => '/v2/radar/abcdef014'],
+        ]]])]);
+        $this->getJson(route('public.weather.radar', $this->province))->assertOk()
+            ->assertJsonCount(1, 'frames')->assertJsonPath('frames.0.time', $now - 600);
     }
 }

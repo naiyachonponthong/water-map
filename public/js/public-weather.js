@@ -73,6 +73,8 @@
   let forecast = null;
   const locations = JSON.parse(el('weatherLocations').textContent);
   let currentLocation = locations.find(p => p.slug === page.dataset.slug);
+  let areas = JSON.parse(el('weatherAreas')?.textContent || '[]'), areaLoading = false;
+  let selectedPoint = null, refreshTimer = null;
   let forecastController = null, contextController = null, generation = 0;
   function dayLabel(d) {
     const today = dayKey(new Date());
@@ -110,11 +112,14 @@
     el('currentFeels').textContent = `${fmt(c.feels_like)} °C`;
     el('currentHumidity').textContent = `${fmt(c.humidity)}%`;
     el('currentWind').textContent = `${fmt(c.wind_kmh)} กม./ชม.`;
-    el('currentTime').textContent = c.time ? `${data.stale ? 'ข้อมูลเก่า · ' : ''}แบบจำลอง ณ ${fullTime(c.time)}` : 'ยังไม่มีข้อมูลสภาพอากาศจากแบบจำลอง';
+    el('currentTime').textContent = c.time ? `${data.current_stale ? 'สภาพอากาศหมดอายุ · ' : data.stale ? 'ข้อมูลเก่า · ' : ''}แบบจำลอง ณ ${fullTime(c.time)}` : 'ยังไม่มีข้อมูลสภาพอากาศจากแบบจำลอง';
     el('summaryCategory').textContent = s.category;
     el('summaryRain').textContent = fmt(s.rain_mm); el('summaryChance').textContent = fmt(s.probability);
     el('summaryStart').textContent = s.first_rain ? fullTime(s.first_rain) : (s.rain_mm == null ? 'ข้อมูลไม่ครบ' : 'ยังไม่คาดว่าจะมีฝน');
     el('summaryChart').innerHTML = chart(data.hours.slice(0, 24));
+    el('weatherCity').textContent = data.location?.name || `ตัวเมือง${currentLocation.name}`;
+    if (el('rainWindows')) el('rainWindows').innerHTML = (s.rain_windows || []).map(w => `<span>${esc(fullTime(w.from))}–${esc(dayKey(w.from) === dayKey(w.to) ? `${clock(w.to)} น.` : fullTime(w.to))} · ${fmt(w.rain_mm)} มม.</span>`).join('') || (s.rain_mm == null ? 'ข้อมูลช่วงฝนไม่ครบ' : 'ยังไม่คาดว่าจะมีฝนใน 24 ชั่วโมง');
+    if (el('forecastQuality')) el('forecastQuality').textContent = `${data.location?.name || `ตัวเมือง${currentLocation.name}`} · ฝนสูงสุดรายชั่วโมง ${fmt(s.max_hour_mm)} มม. · คาดว่ามีฝน ${fmt(s.rain_hours)} ชม. · ${data.stale ? 'ข้อมูลสำรองเก่า' : 'อัปเดตอัตโนมัติทุก 15 นาที'}${data.current_stale ? ' · สภาพอากาศปัจจุบันหมดอายุ' : ''}`;
   }
   function clearForecast() {
     forecast = null;
@@ -125,6 +130,8 @@
     el('currentCondition').textContent = 'กำลังโหลดข้อมูล…'; el('currentTime').textContent = 'ข้อมูลจากแบบจำลอง ไม่ใช่การวัดภาคสนาม';
     el('currentFeels').textContent = '— °C'; el('currentHumidity').textContent = '— %'; el('currentWind').textContent = '— กม./ชม.';
     el('currentIcon').className = 'bi bi-cloud-sun'; el('summaryCategory').textContent = 'กำลังโหลด…';
+    if (el('rainWindows')) el('rainWindows').textContent = '';
+    if (el('forecastQuality')) el('forecastQuality').textContent = 'กำลังโหลดข้อมูลพื้นที่ที่เลือก…';
     el('weatherDays').innerHTML = Array.from({ length: 7 }, (_, i) => `<article class="pw-day"><div class="pw-day-label">${['วันนี้', 'พรุ่งนี้', 'มะรืนนี้'][i] || `อีก ${i} วัน`}</div><div class="pw-skeleton"></div><strong>—</strong></article>`).join('');
   }
   async function loadForecast() {
@@ -135,14 +142,16 @@
     el('weatherUpdated').textContent = `กำลังโหลดพยากรณ์ของ${location.name}…`;
     el('weatherDays').setAttribute('aria-busy', 'true');
     try {
-      const data = await get(location.forecastUrl, signal);
+      const forecastUrl = new URL(location.forecastUrl, window.location.origin);
+      if (selectedPoint) { forecastUrl.searchParams.set('district', el('weatherDistrict').value); forecastUrl.searchParams.set('subdistrict', el('weatherSubdistrict').value); }
+      const data = await get(forecastUrl.href, signal);
       if (version !== generation) return;
       forecast = data; drawOverview(data);
       el('weatherDays').innerHTML = data.days.map(d => {
         const [label, icon] = condition(d.code);
         return `<button type="button" class="pw-day" data-day="${esc(d.date)}" aria-pressed="false" aria-label="ดูพยากรณ์ ${esc(dayLabel(d.date))} ${date(`${d.date}T00:00:00+07:00`)}"><div class="pw-day-label">${esc(dayLabel(d.date))} · ${date(`${d.date}T00:00:00+07:00`)}</div><i class="bi bi-${icon} pw-condition-icon" aria-hidden="true" title="${esc(label)}"></i><strong>${fmt(d.temp_min)}–${fmt(d.temp_max)} °C</strong><div class="pw-day-metrics"><span>ฝน ${fmt(d.rain_mm)} มม.</span><span class="pw-day-prob">โอกาสฝน ${fmt(d.probability)}%</span></div></button>`;
       }).join('');
-      el('weatherUpdated').textContent = `ตัวเมือง${location.name} · ${data.stale ? 'ข้อมูลเก่า: อัปเดตล่าสุดไม่ได้ · ' : ''}ดึงข้อมูล ${fullTime(data.updated_at)}`;
+      el('weatherUpdated').textContent = `${data.location?.name || `ตัวเมือง${location.name}`} · ${data.stale ? 'ข้อมูลเก่า: อัปเดตล่าสุดไม่ได้ · ' : ''}ดึงข้อมูล ${fullTime(data.updated_at)}`;
       const selected = el('forecastDay').value;
       el('forecastDay').innerHTML = data.days.map(d => `<option value="${esc(d.date)}">${esc(dayLabel(d.date))} · ${date(`${d.date}T00:00:00+07:00`)}</option>`).join('');
       if (data.days.some(d => d.date === selected)) el('forecastDay').value = selected;
@@ -157,11 +166,32 @@
       }
     } finally { if (version === generation) { el('weatherDays').setAttribute('aria-busy', 'false'); el('forecastRefresh').disabled = false; } }
   }
-  el('forecastRetry').addEventListener('click', loadForecast);
+    el('forecastRetry').addEventListener('click', loadForecast);
   el('forecastRefresh').addEventListener('click', () => { loadForecast(); loadRadar(); });
+
+  function drawAreas() {
+    if (!el('weatherDistrict')) return;
+    el('weatherDistrict').innerHTML = '<option value="">ตัวเมืองจังหวัด</option>' + areas.map(d => `<option value="${esc(d.code)}">${esc(d.name)}</option>`).join('');
+    el('weatherDistrict').disabled = areaLoading;
+    el('weatherSubdistrict').innerHTML = '<option value="">เลือกตำบล / แขวง</option>';
+    el('weatherSubdistrict').disabled = true;
+  }
+  el('weatherDistrict')?.addEventListener('change', () => {
+    const district = areas.find(d => d.code === el('weatherDistrict').value);
+    selectedPoint = null;
+    el('weatherSubdistrict').innerHTML = '<option value="">เลือกตำบล / แขวง</option>' + (district?.subdistricts || []).map(s => `<option value="${esc(s.code)}" ${s.center ? '' : 'disabled'}>${esc(s.name)}</option>`).join('');
+    el('weatherSubdistrict').disabled = !district;
+    clearForecast(); updateMapLocation(currentLocation); loadForecast();
+  });
+  el('weatherSubdistrict')?.addEventListener('change', () => {
+    selectedPoint = areas.find(d => d.code === el('weatherDistrict').value)?.subdistricts.find(s => s.code === el('weatherSubdistrict').value) || null;
+    clearForecast(); updateMapLocation(currentLocation); loadForecast();
+  });
 
   let map = null, activeLayer = null, frames = [], timer = null, frameIndex = 0, boundaryLayer = null, centerMarker = null;
   const layers = new Map();
+  let playbackRequested = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let mapMoving = false, radarLoading = false;
   function radarMessage(text) { el('radarMessage').textContent = text; el('radarMessage').hidden = !text; }
   function stop() {
     clearTimeout(timer); timer = null;
@@ -174,23 +204,26 @@
     map = L.map('weatherMap', { zoomControl: true, minZoom: 4, maxZoom: 12 }).setView(center, page.dataset.hasCenter === '1' ? 7 : 5);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
     map.on('movestart', () => {
+      mapMoving = true;
       stop();
       // Keep cached frames for smooth playback, but don't reload all hidden frames after panning.
       for (const [path, layer] of layers) if (layer !== activeLayer) { map.removeLayer(layer); layers.delete(path); }
     });
+    map.on('moveend', () => { mapMoving = false; resumeRadar(); });
     const boundaries = JSON.parse(el('weatherBoundaries').textContent);
     updateMapLocation(currentLocation, boundaries);
-    el('radarCenter').addEventListener('click', () => { if (currentLocation.center) map.setView(currentLocation.center, 7); });
+    el('radarCenter').addEventListener('click', () => { const center = selectedPoint?.center || currentLocation.center; if (center) map.setView(center, 7); });
   }
   function updateMapLocation(location, boundaries) {
     if (!map) return;
     if (centerMarker) map.removeLayer(centerMarker);
     if (boundaryLayer) map.removeLayer(boundaryLayer);
     centerMarker = null; boundaryLayer = null;
-    if (location.center) {
-      map.setView(location.center, 7);
-      centerMarker = L.circleMarker(location.center, { radius: 7, color: '#fff', weight: 3, fillColor: '#126fac', fillOpacity: 1 })
-        .bindTooltip(`บริเวณตัวเมือง${esc(location.name)}`).addTo(map);
+    const center = selectedPoint?.center || location.center;
+    if (center) {
+      map.setView(center, selectedPoint ? 9 : 7);
+      centerMarker = L.circleMarker(center, { radius: 7, color: '#fff', weight: 3, fillColor: '#126fac', fillOpacity: 1 })
+        .bindTooltip(esc(selectedPoint?.name || `บริเวณตัวเมือง${location.name}`)).addTo(map);
     }
     if (boundaries?.features?.length) boundaryLayer = L.geoJSON(boundaries, { style: { color: '#ed6370', weight: 2, fillOpacity: .02 } }).addTo(map);
   }
@@ -200,8 +233,9 @@
     stop(); contextController?.abort(); contextController = new AbortController();
     const signal = contextController.signal;
     currentLocation = next; page.dataset.province = next.name; page.dataset.slug = next.slug;
+    selectedPoint = null; areas = []; areaLoading = true; drawAreas();
     page.dataset.forecastUrl = next.forecastUrl; page.dataset.radarUrl = next.radarUrl;
-    el('weatherProvinceTitle').textContent = next.name; el('weatherCity').textContent = next.name;
+    el('weatherProvinceTitle').textContent = next.name; el('weatherCity').textContent = `ตัวเมือง${next.name}`;
     el('weatherHome').href = next.homeUrl; document.title = `พยากรณ์อากาศ ${next.name} | ศูนย์ช่วยเหลือน้ำท่วม`;
     const waterLink = el('weatherWaterLink'); if (waterLink) waterLink.href = next.homeUrl + '/water-map';
     history.replaceState(null, '', next.url);
@@ -209,7 +243,7 @@
     if (!frames.length) loadRadar();
     try {
       const context = await get(next.contextUrl, signal);
-      if (currentLocation.slug === next.slug && !signal.aborted) updateMapLocation(next, context.boundaries);
+      if (currentLocation.slug === next.slug && !signal.aborted) { areas = context.areas || []; areaLoading = false; drawAreas(); updateMapLocation(next, context.boundaries); }
     } catch (_) { /* No fabricated boundary on an unavailable geometry endpoint. */ }
   }
   el('weatherProvince').addEventListener('change', e => changeLocation(e.target.value));
@@ -244,7 +278,7 @@
     layer.on('tileunload', e => { e.tile.dataset.cancelled = '1'; });
     layer.on('loading', () => { layer.weatherError = false; if (layer === activeLayer) radarMessage('กำลังโหลดภาพเรดาร์…'); });
     layer.on('load', () => { if (layer === activeLayer && !layer.weatherError) frameNotice(); });
-    layer.on('tileerror', () => { layer.weatherError = true; if (layer === activeLayer) { stop(); radarMessage('ภาพเรดาร์บางส่วนโหลดไม่ได้ ภาพว่างไม่ยืนยันว่าไม่มีฝน · ลองโหลดใหม่'); } });
+    layer.on('tileerror', () => { layer.weatherError = true; if (layer === activeLayer) { playbackRequested = false; stop(); radarMessage('ภาพเรดาร์บางส่วนโหลดไม่ได้ ภาพว่างไม่ยืนยันว่าไม่มีฝน · ลองโหลดใหม่'); } });
     layers.set(frame.path, layer); return layer;
   }
   let radarHost = '', radarStale = false;
@@ -266,15 +300,26 @@
     else if (activeLayer.isLoading()) radarMessage('กำลังโหลดภาพเรดาร์…');
     else frameNotice();
   }
-  function tick() { showFrame((frameIndex + 1) % frames.length); timer = setTimeout(tick, 4000); }
-  el('radarPlay').addEventListener('click', () => {
-    if (timer) { stop(); return; }
+  function tick() {
+    if (!playbackRequested || document.hidden || el('radarPanel').hidden || mapMoving || radarLoading || frames.length < 2) { stop(); return; }
+    if (activeLayer?.weatherError) { playbackRequested = false; stop(); return; }
+    if (!activeLayer?.isLoading()) showFrame((frameIndex + 1) % frames.length);
+    timer = setTimeout(tick, activeLayer?.isLoading() ? 500 : (frameIndex === frames.length - 1 ? 2500 : 1500));
+  }
+  function resumeRadar() {
+    if (timer || !playbackRequested || document.hidden || el('radarPanel').hidden || mapMoving || radarLoading || frames.length < 2) return;
     el('radarPlay').setAttribute('aria-pressed', 'true'); el('radarPlay').setAttribute('aria-label', 'หยุดเรดาร์ย้อนหลัง');
-    el('radarPlay').innerHTML = '<i class="bi bi-pause-fill" aria-hidden="true"></i>'; tick();
+    el('radarPlay').innerHTML = '<i class="bi bi-pause-fill" aria-hidden="true"></i>';
+    timer = setTimeout(tick, 1500);
+  }
+  el('radarPlay').addEventListener('click', () => {
+    playbackRequested = !playbackRequested;
+    if (!playbackRequested) stop(); else resumeRadar();
   });
-  el('radarSlider').addEventListener('input', () => { stop(); showFrame(Number(el('radarSlider').value)); });
+  el('radarSlider').addEventListener('input', () => { playbackRequested = false; stop(); showFrame(Number(el('radarSlider').value)); });
   async function loadRadar() {
-    if (!map) return;
+    if (!map || radarLoading) return;
+    radarLoading = true;
     stop(); el('radarRefresh').disabled = true; el('radarPlay').disabled = true; el('radarSlider').disabled = true;
     radarMessage('กำลังโหลดภาพเรดาร์…');
     try {
@@ -289,9 +334,10 @@
       showFrame(frames.length - 1);
     } catch (e) {
       stop(); radarMessage(e.message + ' · กดปุ่มโหลดใหม่ด้านล่าง');
+      frames = [];
       if (activeLayer) { map.removeLayer(activeLayer); activeLayer = null; }
       el('radarSlider').disabled = true; el('radarPlay').disabled = true;
-    } finally { el('radarRefresh').disabled = false; }
+    } finally { radarLoading = false; el('radarRefresh').disabled = false; resumeRadar(); }
   }
   el('radarRefresh').addEventListener('click', loadRadar);
   const tabs = [el('forecastTab'), el('radarTab')];
@@ -300,16 +346,20 @@
     el('radarPanel').hidden = index !== 1 && !window.matchMedia('(min-width: 1101px)').matches;
     el('forecastPanel').hidden = index !== 0;
     el('weatherWorkspace').classList.toggle('pw-radar-focus', index === 1);
-    stop(); requestAnimationFrame(() => map?.invalidateSize());
+    stop(); requestAnimationFrame(() => { map?.invalidateSize(); resumeRadar(); });
     if (focus) tabs[index].focus();
   }
   tabs.forEach((tab, i) => {
     tab.addEventListener('click', () => selectTab(i));
     tab.addEventListener('keydown', e => { if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) { e.preventDefault(); selectTab(e.key === 'Home' ? 0 : e.key === 'End' ? 1 : 1 - i, true); } });
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-  window.addEventListener('pagehide', () => { stop(); clearTimeout(queueTimer); forecastController?.abort(); contextController?.abort(); });
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => { if (!document.hidden) { loadForecast(); loadRadar(); } scheduleRefresh(); }, 900000);
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else { resumeRadar(); if (forecast && Date.now() - new Date(forecast.updated_at).getTime() > 900000) { loadForecast(); loadRadar(); } } });
+  window.addEventListener('pagehide', () => { stop(); clearTimeout(refreshTimer); clearTimeout(queueTimer); forecastController?.abort(); contextController?.abort(); });
   window.matchMedia('(min-width: 1101px)').addEventListener('change', () => selectTab(el('radarTab').getAttribute('aria-selected') === 'true' ? 1 : 0));
   window.addEventListener('online', () => { if (!forecast) loadForecast(); if (!frames.length) loadRadar(); });
-  initMap(); selectTab(0); loadForecast(); loadRadar();
+  drawAreas(); initMap(); selectTab(0); loadForecast(); loadRadar(); scheduleRefresh();
 })();
