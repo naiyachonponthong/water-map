@@ -44,6 +44,17 @@ class PublicWaterTest extends TestCase
             'waterlevel_manual_data' => ['result' => 'OK', 'data' => []]];
     }
 
+    public function test_public_collection_command_shares_one_provider_request_and_saves_only_observed_readings(): void
+    {
+        Http::fake([PublicWaterService::ENDPOINT => Http::response($this->payload())]);
+        Province::create(['code' => '10', 'slug' => 'bangkok', 'name_th' => 'กรุงเทพมหานคร', 'region' => 'central', 'is_active' => true]);
+        $this->artisan('flood:sync-public-water')->assertSuccessful();
+        $this->artisan('flood:sync-public-water')->assertSuccessful();
+        Http::assertSentCount(1);
+        $this->assertSame(2, \Illuminate\Support\Facades\DB::table('public_water_readings')->count());
+        $this->assertSame(0, WaterStation::count());
+    }
+
     public function test_map_renders_without_provider_requests_and_inactive_province_is_hidden(): void
     {
         $this->get('/trang/water-map')->assertOk()->assertSee('น้ำท่วมใกล้บ้านฉันไหม?')->assertSee('public-water.css', false);

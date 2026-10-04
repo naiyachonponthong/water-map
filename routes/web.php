@@ -84,6 +84,7 @@ Route::middleware(['auth', 'active', 'idle', '2fa'])->prefix('admin')->group(fun
     Route::get('/hosting', [\App\Http\Controllers\Admin\HostingController::class, 'index'])
         ->middleware('role:super-admin')->name('admin.hosting');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/data-health', [\App\Http\Controllers\Admin\DataHealthController::class, 'index'])->middleware('permission:dashboard.view')->name('admin.data-health');
     Route::get('/dashboard/areas.geojson', [DashboardController::class, 'areas'])->name('dashboard.areas');
     Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
     Route::get('/guide', [\App\Http\Controllers\UsageGuideController::class, 'staff'])->name('admin.guide');
@@ -359,6 +360,12 @@ Route::middleware(['auth', 'active', '2fa', 'permission:field.use'])->prefix('fi
 */
 Route::get('/', [PublicController::class, 'root'])->name('home');
 Route::get('/provinces', [PublicController::class, 'provinces'])->name('public.provinces');
+Route::get('/my-area', [\App\Http\Controllers\Public\InsightsController::class, 'index'])->name('public.my-area');
+Route::get('/{province}/insights', [\App\Http\Controllers\Public\InsightsController::class, 'index'])->where('province', '[a-z][a-z-]+')->name('public.insights');
+Route::get('/{province}/insights/summary.json', [\App\Http\Controllers\Public\InsightsController::class, 'summary'])->where('province', '[a-z][a-z-]+')->middleware('throttle:60,1')->name('public.insights.summary');
+Route::get('/{province}/insights/history.json', [\App\Http\Controllers\Public\InsightsController::class, 'history'])->where('province', '[a-z][a-z-]+')->middleware('throttle:60,1')->name('public.insights.history');
+Route::get('/{province}/data-status', [\App\Http\Controllers\Public\InsightsController::class, 'status'])->where('province', '[a-z][a-z-]+')->name('public.data-status');
+Route::get('/{province}/data-status.json', [\App\Http\Controllers\Public\InsightsController::class, 'statusJson'])->where('province', '[a-z][a-z-]+')->middleware('throttle:60,1')->name('public.data-status.json');
 Route::get('/guide', [\App\Http\Controllers\UsageGuideController::class, 'index'])->name('public.guide');
 Route::get('/{province}/guide', [\App\Http\Controllers\UsageGuideController::class, 'showProvince'])->where('province', '[a-z][a-z-]+')->name('public.province.guide');
 

@@ -45,11 +45,13 @@ class WeatherController extends Controller
     {
         abort_unless($province->is_active, 404);
         if (! $weather->center($province)) {
+            app(\App\Support\DataSourceHealth::class)->failure('forecast', $province->id);
             return response()->json(['message' => 'ยังไม่ได้กำหนดพิกัดสำหรับพยากรณ์จังหวัดนี้'], 422);
         }
         try {
             return response()->json($weather->forecast($province))->header('Cache-Control', 'no-store');
         } catch (Throwable $e) {
+            app(\App\Support\DataSourceHealth::class)->failure('forecast', $province->id);
             return response()->json(['message' => 'ยังโหลดพยากรณ์ไม่ได้ กรุณาลองใหม่ภายหลัง'], 503)
                 ->header('Retry-After', '60')->header('Cache-Control', 'no-store');
         }

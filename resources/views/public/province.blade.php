@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/public-home.css') }}?v={{ filemtime(public_path('css/public-home.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/public-weather.css') }}?v={{ filemtime(public_path('css/public-weather.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/home-dashboard.css') }}?v={{ filemtime(public_path('css/home-dashboard.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/insights.css') }}?v={{ filemtime(public_path('css/insights.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/public-water.css') }}?v={{ filemtime(public_path('css/public-water.css')) }}">
     @if($risks->isNotEmpty())<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">@endif
 @endpush
@@ -50,6 +51,7 @@
             <a href="{{ route('public.weather', $province) }}"><span class="fh-service-icon violet"><i class="bi bi-cloud-sun" aria-hidden="true"></i></span><div><strong>พยากรณ์อากาศ</strong><small>ฝน ลม และเรดาร์ย้อนหลัง</small></div><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
             <a href="#emergency-contacts"><span class="fh-service-icon orange"><i class="bi bi-telephone" aria-hidden="true"></i></span><div><strong>เบอร์ฉุกเฉิน</strong><small>ติดต่อความช่วยเหลือ</small></div><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
         </div>
+        <section class="ia-home-promo"><div><strong><i class="bi bi-house-heart me-2"></i>พื้นที่ของฉัน · รู้ทันน้ำและฝนใกล้บ้าน</strong><small>บันทึกพื้นที่ที่สนใจ ดูกราฟฝน ระดับน้ำ และรายงาน พร้อมตรวจความสดของข้อมูล</small></div><a href="{{ route('public.insights', $province) }}">เปิดภาพรวมและกราฟ <i class="bi bi-arrow-up-right"></i></a></section>
         <div class="fh-content-grid">
             @include('partials.nearby-flood')
             <section class="fh-water-promo"><span class="wm-kicker">รู้ทันระดับน้ำ</span><h2>เห็นทั้งจังหวัด<br>เข้าใจได้ในแผนที่เดียว</h2><p>สถานีตรวจวัด · ระดับน้ำเทียบตลิ่ง · รายงานในพื้นที่</p><a href="{{ route('public.water-map', $province) }}">เปิดแผนที่ระดับน้ำ {{ $province->name_th }} <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><small class="wm-art-label">ภาพประกอบ</small></section>

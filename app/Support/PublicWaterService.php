@@ -52,6 +52,7 @@ class PublicWaterService
                         $entry = ['fetched' => now()->timestamp, 'stations' => array_values($stations)];
                         Cache::put($key, $entry, 3600);
                     } catch (Throwable $e) {
+                        app(DataSourceHealth::class)->failure('water', $province->id);
                         Cache::put($key.':backoff', true, 60);
                         $stale = true;
                     } finally {
@@ -63,6 +64,7 @@ class PublicWaterService
             }
         }
         if (! $entry || $entry['fetched'] < now()->timestamp - 3600) {
+            app(DataSourceHealth::class)->failure('water', $province->id);
             throw new RuntimeException('ThaiWater temporarily unavailable');
         }
         $stations = array_values(array_filter($entry['stations'], fn ($s) => $s['province_code'] === (string) $province->code));
@@ -73,6 +75,16 @@ class PublicWaterService
             }
         }
         unset($station);
+
+        $fetchedAt = Carbon::createFromTimestamp($entry['fetched'])->toIso8601String();
+        app(DataSourceHealth::class)->success('water', $province->id, $fetchedAt, collect($stations)->max('measured_at'), [
+            'total' => count($stations), 'current' => count(array_filter($stations, fn ($s) => ! $s['outdated'] && $s['value'] !== null)),
+        ]);
+        if ($stale) {
+            app(DataSourceHealth::class)->failure('water', $province->id);
+        } else {
+            app(PublicWaterHistory::class)->record($province, $stations);
+        }
 
         return ['stations' => $stations, 'stale' => $stale, 'fetched_at' => Carbon::createFromTimestamp($entry['fetched'])->toIso8601String(),
             'source' => 'คลังข้อมูลน้ำแห่งชาติ (ThaiWater) สสน.', 'source_url' => 'https://www.thaiwater.net/',

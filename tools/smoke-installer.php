@@ -130,7 +130,7 @@ try {
     $check(password_verify($adminPassword, $appDb->query('SELECT password FROM users')->fetchColumn()), 'chosen admin password is valid');
     $parsedAfter = Dotenv\Dotenv::parse(file_get_contents($copy.'/.env'));
     $check($parsedAfter['APP_KEY'] === $parsed['APP_KEY'] && $parsedAfter['APP_DEBUG'] === 'false', 'encryption key is unchanged and production debug is disabled');
-    foreach (['/provinces', '/guide', '/trang/guide', '/trang', '/trang/map', '/trang/map.geojson', '/trang/weather', '/trang/water-map', '/trang/water/context.json', '/trang/water/reports.json', '/login'] as $path) {
+    foreach (['/provinces', '/guide', '/trang/guide', '/trang', '/trang/map', '/trang/map.geojson', '/trang/weather', '/trang/water-map', '/trang/water/context.json', '/trang/water/reports.json', '/my-area', '/trang/insights', '/trang/insights/summary.json', '/trang/data-status', '/trang/data-status.json', '/login'] as $path) {
         [$code] = $request($path);
         $check($code === 200, 'installed page '.$path.' responds successfully');
     }

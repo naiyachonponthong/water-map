@@ -40,6 +40,7 @@ class Menu
             'water' => [
                 'label' => 'ข้อมูลน้ำ',
                 'items' => [
+                    ['key' => 'data-health', 'label' => 'ความสดของข้อมูล', 'short' => 'ข้อมูล', 'icon' => 'activity', 'tone' => 'teal', 'route' => 'admin.data-health', 'active' => 'admin.data-health', 'can' => 'dashboard.view', 'rail' => false],
                     ['key' => 'alerts', 'label' => 'เตือนภัยล่วงหน้า', 'short' => 'เตือนภัย', 'icon' => 'bell', 'tone' => 'danger', 'route' => 'alerts.index', 'active' => 'alerts.*', 'can' => 'dashboard.view', 'rail' => true, 'badge' => 'alerts_unack'],
                     ['key' => 'reports', 'label' => 'รายงานระดับน้ำ', 'short' => 'รายงานน้ำ', 'icon' => 'droplet-half', 'tone' => 'blue', 'route' => 'reports.index', 'active' => 'reports.*', 'can' => 'reports.moderate', 'rail' => true, 'badge' => 'report_review'],
                     ['key' => 'stations', 'label' => 'สถานีวัดน้ำ', 'short' => 'สถานี', 'icon' => 'water', 'tone' => 'blue', 'route' => 'stations.index', 'active' => 'stations.*', 'can' => 'stations.manage', 'rail' => false],

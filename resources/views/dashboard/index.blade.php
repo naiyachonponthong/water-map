@@ -6,6 +6,9 @@
 @endpush
 
 @section('content')
+    @if(($dataHealth['issues'] ?? 0) > 0)
+        <div class="alert alert-warning d-flex justify-content-between gap-3"><span><i class="bi bi-activity"></i> ข้อมูลต้นทาง {{ $dataHealth['issues'] }} แหล่งมีข้อมูลเก่าหรือเชื่อมต่อไม่สำเร็จ</span><a href="{{ route('admin.data-health') }}">ตรวจความสดของข้อมูล →</a></div>
+    @endif
     @php
         $done = collect($checklist)->where('done', true)->count();
         $total = count($checklist);

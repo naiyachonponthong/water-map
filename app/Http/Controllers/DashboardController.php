@@ -50,6 +50,7 @@ class DashboardController extends Controller
             'province' => $province,
             'checklist' => $checklist,
             'pendingUsers' => $pendingUsers,
+            'dataHealth' => app(\App\Support\DataSourceHealth::class)->snapshot($province),
             'snap' => \App\Support\LiveSnapshot::cached($province),
         ]);
     }

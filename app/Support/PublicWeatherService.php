@@ -86,7 +86,7 @@ class PublicWeatherService
                     'wind_kmh' => $this->number($current['wind_speed_10m'] ?? null, 500),
                     'wind_direction' => $this->number($current['wind_direction_10m'] ?? null, 360),
                 ]];
-        });
+        }, 'forecast', $province->id);
         // Recalculate the rolling window even when serving cached data (including across midnight).
         $from = now('Asia/Bangkok')->startOfHour();
         // Open-Meteo precipitation belongs to the preceding hour. Skip the hour that
@@ -132,13 +132,14 @@ class PublicWeatherService
 
             return ['host' => $raw['host'], 'frames' => array_slice($frames, -24),
                 'generated' => $raw['generated'] ?? null, 'updated_at' => now()->toIso8601String(), 'source' => 'RainViewer'];
-        });
+        }, 'radar', null);
     }
 
-    private function cached(string $key, int $freshSeconds, int $maxAge, callable $fetch): array
+    private function cached(string $key, int $freshSeconds, int $maxAge, callable $fetch, string $source, ?int $provinceId): array
     {
         $old = Cache::get($key);
         if ($old && now()->timestamp - $old['at'] < $freshSeconds) {
+            $this->health($source, $provinceId, $old['data']);
             return $old['data'] + ['stale' => false];
         }
         // A short failure backoff prevents every visitor from retrying a provider outage.
@@ -146,17 +147,28 @@ class PublicWeatherService
             try {
                 $data = $fetch();
                 Cache::put($key, ['at' => now()->timestamp, 'data' => $data], $maxAge);
+                $this->health($source, $provinceId, $data);
 
                 return $data + ['stale' => false];
             } catch (Throwable $e) {
+                app(DataSourceHealth::class)->failure($source, $provinceId);
                 report($e);
                 Cache::put($key.':failed', true, 60);
             }
         }
         if ($old && now()->timestamp - $old['at'] < $maxAge) {
+            $this->health($source, $provinceId, $old['data']);
+            app(DataSourceHealth::class)->failure($source, $provinceId);
             return $old['data'] + ['stale' => true];
         }
+        app(DataSourceHealth::class)->failure($source, $provinceId);
         throw new RuntimeException('Weather provider unavailable');
+    }
+
+    private function health(string $source, ?int $provinceId, array $data): void
+    {
+        $measured = $source === 'radar' ? Carbon::createFromTimestamp(max(array_column($data['frames'], 'time')))->toIso8601String() : null;
+        app(DataSourceHealth::class)->success($source, $provinceId, $data['updated_at'], $measured);
     }
 
     private function number(mixed $value, float $max = 10000, float $min = 0): ?float

@@ -5,6 +5,7 @@
             <span><strong>ศูนย์ช่วยเหลือน้ำท่วม</strong><small>เคียงข้างทุกคน ในทุกสถานการณ์</small></span>
         </a>
         <div class="fh-nav-links">
+            <a href="{{ route('public.my-area') }}" class="fh-guide"><i class="bi bi-house-heart" aria-hidden="true"></i><span>พื้นที่ของฉัน</span></a>
             @isset($province)
                 <div class="fh-desktop-nav"><a href="{{ route('public.province', $province) }}#local-info">ภาพรวมพื้นที่</a><a href="{{ route('public.water-map', $province) }}">ระดับน้ำสถานี</a><a href="{{ route('public.weather', $province) }}">ฝนและพยากรณ์</a></div>
             @endisset
