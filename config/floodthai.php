@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'version' => '1.1.0',
+    'version' => '1.1.1',
 
     // New installations may serve validated images through PHP when symlinks are unavailable.
     'public_uploads_through_app' => (bool) env('PUBLIC_UPLOADS_THROUGH_APP', false),

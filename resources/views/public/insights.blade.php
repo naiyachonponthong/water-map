@@ -10,7 +10,6 @@
 <main class="ia-shell" data-insights data-initial="{{ $province?->slug }}">
     <header class="ia-hero">
         <div><span class="ia-eyebrow">MY AREA / พื้นที่ที่คุณห่วงใย</span><h1>รู้ทันน้ำและฝน<br><span>ใกล้บ้านคุณ</span></h1><p>เลือกพื้นที่ครั้งเดียว กลับมาเช็กสถานการณ์ได้ทุกวัน</p></div>
-        <div class="ia-hero-symbol" aria-hidden="true"><i class="bi bi-house-heart"></i><span><i class="bi bi-droplet-fill"></i></span></div>
     </header>
     <section class="ia-selection" aria-label="เลือกพื้นที่ของฉัน">
         <div class="ia-fields">
