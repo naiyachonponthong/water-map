@@ -18,6 +18,7 @@ class Attribution
             'resources/views/layouts/guest.blade.php' => "@include('partials.creator-credit')",
             'app/Support/Attribution.php' => self::AUTHOR,
             'NOTICE.md' => self::AUTHOR,
+            'LICENSE.md' => self::AUTHOR,
             'public/css/creator-credit.css' => '.creator-credit',
         ];
         foreach ($required as $path => $needle) {

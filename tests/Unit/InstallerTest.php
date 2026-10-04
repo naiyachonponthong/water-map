@@ -151,8 +151,8 @@ class InstallerTest extends TestCase
     {
         $db = $this->getMockBuilder(PDO::class)->disableOriginalConstructor()->onlyMethods(['query'])->getMock();
         $statement = $this->getMockBuilder(PDOStatement::class)->disableOriginalConstructor()->onlyMethods(['fetchColumn'])->getMock();
-        $statement->method('fetchColumn')->willReturn('existing_users');
-        $db->method('query')->willReturn($statement);
+        $statement->expects($this->once())->method('fetchColumn')->willReturn('existing_users');
+        $db->expects($this->once())->method('query')->willReturn($statement);
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('มีตารางอยู่แล้ว');
         Installer::assertEmpty($db);

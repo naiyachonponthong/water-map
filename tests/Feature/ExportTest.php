@@ -61,8 +61,8 @@ class ExportTest extends TestCase
         $r = app(ReportService::class)->build($this->province, now()->subDay(), now()->addMinute());
         $this->assertSame(3, $r['cases']['total']);
         $this->assertSame(9, $r['cases']['people_rescued']);
-        $this->assertSame(50, $r['response']['arrive']['median']);
-        $this->assertSame(10, $r['response']['accept']['median']);
+        $this->assertSame(50.0, $r['response']['arrive']['median']);
+        $this->assertSame(10.0, $r['response']['accept']['median']);
         $this->assertSame(3, $r['teams'][0]['done']);
 
         $this->actingAs($this->admin)->get(route('exports.index'))->assertOk()->assertSee('ทีมเรือ');

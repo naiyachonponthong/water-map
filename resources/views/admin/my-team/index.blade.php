@@ -82,7 +82,7 @@
     <script>
         (function () {
             // ส่งพิกัดทุก 60 วินาทีเมื่อทีมไม่ได้พัก/ไม่ออกปฏิบัติ
-            const active = @json(in_array($team->status, ['available', 'busy'], true));
+            const active = {{ \Illuminate\Support\Js::from(in_array($team->status, ['available', 'busy'], true)) }};
             const url = @json(route('my-team.location'));
             const token = document.querySelector('meta[name=csrf-token]').content;
             const send = () => navigator.geolocation && navigator.geolocation.getCurrentPosition(p => {

@@ -26,6 +26,12 @@
         ];
     @endphp
 
+    @role('super-admin')
+        <div class="alert alert-info d-flex flex-wrap align-items-center gap-2">
+            <span class="me-auto">เตรียมจังหวัดให้พร้อมก่อนเปิดรับเหตุจริง</span>
+            <a class="btn btn-sm btn-primary" href="{{ route('admin.setup') }}">เปิดตัวช่วยตั้งค่าเริ่มต้น <i class="bi bi-arrow-right"></i></a>
+        </div>
+    @endrole
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
         <div class="me-auto">
             <h1 class="h4 fw-bold mb-0" style="letter-spacing:-.02em">ศูนย์สั่งการ{{ $province->fullName() }}</h1>

@@ -30,6 +30,11 @@ class Shelter extends Model
         ];
     }
 
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);

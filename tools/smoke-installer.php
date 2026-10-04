@@ -32,7 +32,12 @@ $zip->close();
 $copy = $dir.'/floodthai';
 $dbPassword = 'Smoke#"${APP_NAME}\\'.bin2hex(random_bytes(12));
 $adminPassword = 'Install!'.bin2hex(random_bytes(12));
-$adminDb = new PDO(getenv('INSTALL_TEST_MYSQL_DSN') ?: 'mysql:host=127.0.0.1;port=3306;charset=utf8mb4', getenv('INSTALL_TEST_MYSQL_USER') ?: 'root', getenv('INSTALL_TEST_MYSQL_PASSWORD') ?: '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+$testHost = '127.0.0.1';
+$testPort = (int) (getenv('INSTALL_TEST_MYSQL_PORT') ?: 3306);
+if ($testPort < 1 || $testPort > 65535) {
+    throw new RuntimeException('Invalid local test database port');
+}
+$adminDb = new PDO('mysql:host='.$testHost.';port='.$testPort.';charset=utf8mb4', getenv('INSTALL_TEST_MYSQL_USER') ?: 'root', getenv('INSTALL_TEST_MYSQL_PASSWORD') ?: '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 $server = null;
 $createdDb = false;
 $createdUser = false;
@@ -99,7 +104,7 @@ try {
     $currentCsrf = $csrf($html);
     [$code, $html] = $request('/install.php', ['csrf' => $currentCsrf, 'action' => 'configure',
         'app_name' => 'Installer Smoke Test', 'app_url' => 'http://127.0.0.1:'.$port,
-        'db_host' => '127.0.0.1', 'db_port' => '3306', 'db_name' => $testDatabase, 'db_user' => $testUser, 'db_password' => $dbPassword,
+        'db_host' => $testHost, 'db_port' => (string) $testPort, 'db_name' => $testDatabase, 'db_user' => $testUser, 'db_password' => $dbPassword,
         'admin_name' => 'Isolated Test Admin', 'admin_phone' => '0898765432', 'admin_password' => $adminPassword, 'admin_confirmation' => $adminPassword, 'mode' => 'shared']);
     $check($code === 200 && is_file($copy.'/.env') && str_contains($html, 'name="action" value="advance"'), 'empty isolated database is configured');
     $envBefore = file_get_contents($copy.'/.env');
@@ -117,10 +122,10 @@ try {
         }
         $check($code === 200 && ! str_contains($html, 'role="alert"'), $phase.' completes using production-only dependencies');
     }
-    $check(str_contains($html, 'ตั้งค่าเว็บไซต์สำเร็จ'), 'completion discloses pending cron readiness');
+    $check(str_contains($html, 'ตั้งค่าเว็บไซต์สำเร็จ') && str_contains($html, '/admin/setup'), 'completion discloses pending cron readiness and links the setup assistant');
     [$code] = $request('/install.php');
     $check($code === 410, 'installer is permanently locked after success');
-    $appDb = new PDO('mysql:host=127.0.0.1;dbname='.$testDatabase.';charset=utf8mb4', $testUser, $dbPassword, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $appDb = new PDO('mysql:host='.$testHost.';port='.$testPort.';dbname='.$testDatabase.';charset=utf8mb4', $testUser, $dbPassword, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     $check((int) $appDb->query('SELECT COUNT(*) FROM provinces')->fetchColumn() === 77 && (int) $appDb->query('SELECT COUNT(*) FROM users')->fetchColumn() === 1, '77 provinces and exactly the chosen admin are seeded');
     $check(password_verify($adminPassword, $appDb->query('SELECT password FROM users')->fetchColumn()), 'chosen admin password is valid');
     $parsedAfter = Dotenv\Dotenv::parse(file_get_contents($copy.'/.env'));

@@ -49,9 +49,11 @@ class ForecastService
                 $districtId = $chunk[$i][0] ?? null;
                 $daily = $loc['daily'] ?? [];
                 foreach ($daily['time'] ?? [] as $d => $date) {
-                    RainForecast::updateOrCreate(
-                        ['province_id' => $province->id, 'district_id' => $districtId, 'date' => $date],
+                    // Date casts are persisted with midnight on SQLite; match the calendar date on every driver.
+                    RainForecast::whereDate('date', $date)->updateOrCreate(
+                        ['province_id' => $province->id, 'district_id' => $districtId],
                         [
+                            'date' => $date,
                             'rain_mm' => (float) ($daily['precipitation_sum'][$d] ?? 0),
                             'rain_prob' => isset($daily['precipitation_probability_max'][$d]) ? (int) $daily['precipitation_probability_max'][$d] : null,
                             'temp_max' => $daily['temperature_2m_max'][$d] ?? null,

@@ -16,7 +16,7 @@ class ReleasePackageTest extends TestCase
             $this->assertFalse(ReleasePackage::allowed($path), $path);
         }
         foreach (['public/images/flood-rescue-hero.png', 'public/install.php', 'installer/Installer.php',
-            '.env.example', 'composer.lock', 'database/migrations/schema.php', 'resources/views/public/province.blade.php'] as $path) {
+            '.env.example', 'composer.lock', 'LICENSE.md', 'database/migrations/schema.php', 'resources/views/public/province.blade.php'] as $path) {
             $this->assertTrue(ReleasePackage::allowed($path), $path);
         }
     }

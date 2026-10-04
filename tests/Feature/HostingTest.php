@@ -26,13 +26,13 @@ class HostingTest extends TestCase
     public function test_recent_worker_heartbeats_are_required_and_old_ones_fail(): void
     {
         $status = $this->getMockBuilder(HostingStatus::class)->onlyMethods(['lastBeat'])->getMock();
-        $status->method('lastBeat')->willReturn(now()->timestamp - 181);
+        $status->expects($this->atLeastOnce())->method('lastBeat')->willReturn(now()->timestamp - 181);
         $checks = array_values(array_filter($status->checks(), fn ($c) => str_contains($c['label'], 'ทำงานล่าสุด')));
         $this->assertCount(2, $checks);
         $this->assertFalse($checks[0]['ok']);
         $this->assertFalse($checks[1]['ok']);
         $fresh = $this->getMockBuilder(HostingStatus::class)->onlyMethods(['lastBeat'])->getMock();
-        $fresh->method('lastBeat')->willReturn(now()->timestamp - 30);
+        $fresh->expects($this->atLeastOnce())->method('lastBeat')->willReturn(now()->timestamp - 30);
         $checks = array_values(array_filter($fresh->checks(), fn ($c) => str_contains($c['label'], 'ทำงานล่าสุด')));
         $this->assertTrue($checks[0]['ok']);
         $this->assertTrue($checks[1]['ok']);

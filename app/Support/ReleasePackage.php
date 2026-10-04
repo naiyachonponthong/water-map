@@ -27,7 +27,7 @@ class ReleasePackage
         }
 
         return in_array(explode('/', $path)[0], self::DIRECTORIES, true)
-            || in_array($path, ['artisan', 'composer.json', 'composer.lock', 'README.md', 'NOTICE.md', '.env.example'], true);
+            || in_array($path, ['artisan', 'composer.json', 'composer.lock', 'README.md', 'NOTICE.md', 'LICENSE.md', '.env.example'], true);
     }
 
     public static function copySources(string $root, string $target): void
@@ -46,14 +46,14 @@ class ReleasePackage
                 self::copy($file->getPathname(), $target.'/'.$relative);
             }
         }
-        foreach (['artisan', 'composer.json', 'composer.lock', 'README.md', 'NOTICE.md', '.env.example'] as $file) {
+        foreach (['artisan', 'composer.json', 'composer.lock', 'README.md', 'NOTICE.md', 'LICENSE.md', '.env.example'] as $file) {
             self::copy($root.'/'.$file, $target.'/'.$file);
         }
         // Blank template credentials; the web installer generates per-site values.
         $template = file_get_contents($target.'/.env.example');
         $template = preg_replace('/^(SUPERADMIN_PHONE|SUPERADMIN_PASSWORD|REVERB_APP_SECRET)=.*$/m', '$1=', $template);
         file_put_contents($target.'/.env.example', $template);
-        self::copy($root.'/docs/INSTALL-EASY.md', $target.'/START-HERE.md');
+        file_put_contents($target.'/START-HERE.md', "# เริ่มติดตั้ง FloodThai\n\nอ่าน [คู่มือติดตั้งผ่านเว็บ](docs/INSTALL-EASY.md) หรือเลือก [Plesk](docs/INSTALL-PLESK.md), [cPanel](docs/INSTALL-CPANEL.md), [DirectAdmin](docs/INSTALL-DIRECTADMIN.md)\n\nชุดนี้มี dependencies พร้อม ไม่รวมรหัสผ่านหรือข้อมูลจากเครื่องผู้แจก\nตั้ง Document Root ไป public แล้วเปิด /install.php; หลังติดตั้งเข้าสู่ /admin/setup ทำผู้ช่วย 5 ขั้นก่อนเปิดรับเหตุ\n\nแจกฟรีโดยคงเครดิต Naiyachon ponthong ตาม [LICENSE.md](LICENSE.md)\n");
         foreach (self::RUNTIME_DIRECTORIES as $dir) {
             if (! is_dir($target.'/'.$dir)) {
                 mkdir($target.'/'.$dir, 0755, true);

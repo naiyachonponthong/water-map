@@ -9,12 +9,18 @@ use Symfony\Component\Process\Process;
 
 class BuildRelease extends Command
 {
-    protected $signature = 'flood:package {--composer= : Path to composer.phar; otherwise use composer on PATH}';
+    protected $signature = 'flood:package {--composer= : Path to composer.phar; otherwise use composer on PATH} {--release-version= : Release version, e.g. 1.0.0}';
 
     protected $description = 'สร้าง ZIP พร้อมติดตั้งแบบไม่มีข้อมูลส่วนตัวและ dependencies สำหรับพัฒนา';
 
     public function handle(): int
     {
+        $version = $this->option('release-version');
+        if ($version !== null && ! preg_match('/^\d+\.\d+\.\d+(?:-[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*)?$/D', $version)) {
+            $this->error('ระบุเวอร์ชันรูปแบบ 1.0.0 หรือ 1.0.0-rc.1 เท่านั้น');
+
+            return self::FAILURE;
+        }
         try {
             Attribution::verifyRelease(base_path());
         } catch (\RuntimeException $e) {
@@ -55,7 +61,12 @@ class BuildRelease extends Command
 
             return self::FAILURE;
         }
-        $destination = $output.'/floodthai-'.$id.'.zip';
+        $destination = $output.'/floodthai-'.($version ? 'v'.$version : $id).'.zip';
+        if (file_exists($destination)) {
+            $this->error('ไฟล์เวอร์ชันนี้มีอยู่แล้ว ไม่เขียนทับ กรุณาใช้เวอร์ชันใหม่');
+
+            return self::FAILURE;
+        }
         $count = ReleasePackage::archive($stage, $destination);
         file_put_contents($destination.'.sha256', hash_file('sha256', $destination).'  '.basename($destination)."\n");
         $this->info("พร้อมแจกจ่าย: {$destination} ({$count} files)");

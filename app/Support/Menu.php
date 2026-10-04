@@ -74,6 +74,7 @@ class Menu
                     ['key' => 'users', 'label' => 'ผู้ใช้และสิทธิ์', 'short' => 'ผู้ใช้', 'icon' => 'person-gear', 'tone' => 'slate', 'route' => 'admin.users.index', 'active' => 'admin.users.*', 'can' => 'users.manage', 'rail' => true, 'badge' => 'pending_users'],
                     ['key' => 'areas', 'label' => 'อำเภอและตำบล', 'short' => 'พื้นที่', 'icon' => 'map', 'tone' => 'teal', 'route' => 'admin.areas.index', 'active' => 'admin.areas.*', 'can' => 'areas.manage', 'rail' => false],
                     ['key' => 'provinces', 'label' => 'จังหวัดทั้งหมด', 'short' => 'จังหวัด', 'icon' => 'globe-asia-australia', 'tone' => 'blue', 'route' => 'admin.provinces.index', 'active' => 'admin.provinces.*', 'can' => 'provinces.manage', 'rail' => false],
+                    ['key' => 'setup', 'label' => 'ตั้งค่าเริ่มต้น', 'short' => 'เริ่มต้น', 'icon' => 'rocket-takeoff', 'tone' => 'teal', 'route' => 'admin.setup', 'active' => 'admin.setup*', 'role' => 'super-admin', 'rail' => false],
                     ['key' => 'hosting', 'label' => 'ความพร้อมของโฮสต์', 'short' => 'โฮสต์', 'icon' => 'server', 'tone' => 'teal', 'route' => 'admin.hosting', 'active' => 'admin.hosting', 'role' => 'super-admin', 'rail' => false],
                     ['key' => 'audit', 'label' => 'ประวัติการใช้งาน', 'short' => 'ประวัติ', 'icon' => 'clock-history', 'tone' => 'slate', 'route' => 'admin.audit.index', 'active' => 'admin.audit.*', 'can' => 'audit.view', 'rail' => false],
                 ],

@@ -39,14 +39,14 @@ class RiskProposalController extends Controller
             'proposer_phone' => ['nullable', 'string', 'max:20'],
         ], ['lat.required' => 'ปักหมุดตำแหน่งบนแผนที่'], ['name' => 'ชื่อจุด', 'type' => 'ประเภท']);
 
-        RiskPoint::create($data + [
+        RiskPoint::create(array_replace($data, [
             'province_id' => $province->id,
             'proposer_phone' => ! empty($data['proposer_phone']) ? User::normalizePhone($data['proposer_phone']) : null,
             'severity' => 'medium',
             'source' => 'citizen',
             'review' => 'pending',
             'is_public' => true,
-        ]);
+        ]));
 
         return redirect()->route('public.province', $province)->with('success', 'ขอบคุณที่แจ้ง เจ้าหน้าที่จะตรวจสอบก่อนแสดงบนแผนที่');
     }

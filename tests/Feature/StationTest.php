@@ -115,6 +115,7 @@ class StationTest extends TestCase
 
         $rain = 3;
         $svc->fetch($this->province);
+        $this->assertSame(7, RainForecast::whereNull('district_id')->count());
         $svc->evaluate($this->province);
         $this->assertSame('resolved', $alert->fresh()->status);
     }

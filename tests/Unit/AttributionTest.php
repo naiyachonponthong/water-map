@@ -21,7 +21,7 @@ class AttributionTest extends TestCase
         $root = sys_get_temp_dir().'/floodthai-credit-test-'.bin2hex(random_bytes(8));
         $files = ['resources/views/partials/creator-credit.blade.php', 'resources/views/layouts/public.blade.php',
             'resources/views/layouts/app.blade.php', 'resources/views/layouts/guest.blade.php',
-            'app/Support/Attribution.php', 'NOTICE.md', 'public/css/creator-credit.css'];
+            'app/Support/Attribution.php', 'NOTICE.md', 'LICENSE.md', 'public/css/creator-credit.css'];
         try {
             foreach ($files as $file) {
                 if (! is_dir(dirname($root.'/'.$file))) {

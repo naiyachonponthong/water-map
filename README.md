@@ -4,10 +4,17 @@
 
 ## ชุดแจกจ่ายติดตั้งง่าย
 
-อ่าน [คู่มือติดตั้งผ่านเว็บ](docs/INSTALL-EASY.md) สำหรับ cPanel / DirectAdmin / VPS ที่ผ่านข้อกำหนด
+ดาวน์โหลด **ZIP พร้อมใช้งาน** และไฟล์ตรวจสอบ SHA-256 จาก [GitHub Releases](https://github.com/naiyachonponthong/water-map/releases/latest)
+อย่าใช้ปุ่ม Code → Download ZIP แทนชุดติดตั้ง: ZIP ซอร์สโค้ดไม่มี `vendor`
+
+อ่าน [คู่มือติดตั้งผ่านเว็บ](docs/INSTALL-EASY.md) หรือเลือก [Plesk](docs/INSTALL-PLESK.md) / [cPanel](docs/INSTALL-CPANEL.md) / [DirectAdmin](docs/INSTALL-DIRECTADMIN.md)
 ผู้แจกจ่ายสร้าง ZIP พร้อม dependencies ด้วย `php artisan flood:package` (ไม่รวม .env หรือข้อมูลจากเครื่อง)
 ผู้รับอัปโหลด ZIP → ตั้งเว็บไซต์เป็น public → เปิด `/install.php` → ตั้งบัญชีผู้ดูแลของตัวเอง
-ติดตั้งแล้วเปิด `/admin/hosting` ตรวจงานอัตโนมัติ/คิวก่อนเปิดรับเหตุจริง ตัวติดตั้งไม่เขียนทับฐานข้อมูลเดิม
+ติดตั้งแล้วเปิด `/admin/setup` ใช้ผู้ช่วย 5 ขั้น: จังหวัด → หน่วยงาน → เจ้าหน้าที่/พื้นที่ → โฮสต์/Cron → ทดสอบก่อนเปิดจริง
+หน้าผู้ช่วยไม่เปิดรับเหตุแทนคุณ และแยกการตั้งค่าตามจังหวัด ตัวติดตั้งไม่เขียนทับฐานข้อมูลเดิม
+
+แจกให้ใช้และแก้ไขฟรีตาม [LICENSE.md](LICENSE.md) โดยคงเครดิต **Naiyachon ponthong** และแนบข้อกำหนดเมื่อแจกต่อ
+สิทธิ์ของ dependencies/แผนที่/API เป็นของเจ้าของเดิม ไม่รวมค่าโฮสต์หรือค่าบริการภายนอก
 
 ## ชุดนี้มีอะไร
 
@@ -176,7 +183,8 @@ php artisan reverb:start --host=0.0.0.0 --port=8080   # ให้ Nginx proxy ws
 composer install
 cp .env.example .env
 php artisan key:generate
-# แก้ DB_* ใน .env แล้วสร้างฐานข้อมูล floodthai (utf8mb4_unicode_ci)
+# แก้ DB_* และตั้ง SUPERADMIN_PHONE / SUPERADMIN_PASSWORD ของตัวเองใน .env ก่อน seed
+# สร้างฐานข้อมูล floodthai (utf8mb4_unicode_ci) แยกจากระบบอื่น
 php artisan migrate --seed
 php artisan storage:link
 php artisan serve
@@ -184,7 +192,8 @@ php artisan serve
 
 เข้าระบบที่ `/login` ด้วย `SUPERADMIN_PHONE` / `SUPERADMIN_PASSWORD` ที่กำหนดเองใน `.env` แล้วเปลี่ยนรหัสผ่านทันทีหลังติดตั้ง
 
-รันงานตั้งเวลา (เฟสถัดไปใช้ sync ข้อมูลน้ำ): ตั้ง cron `* * * * * php /path/artisan schedule:run`
+โฮสต์ทั่วไปตั้ง Cron ทุกนาทีเรียก `php /path/artisan flood:cron` (PHP CLI 8.3 ขึ้นไป)
+VPS ที่มี queue worker แยกดู [คู่มือขึ้นเซิร์ฟเวอร์](docs/DEPLOY.md) อย่าตั้งงานสองรูปแบบซ้ำกัน
 
 ## นำเข้าขอบเขตอำเภอ/ตำบล
 

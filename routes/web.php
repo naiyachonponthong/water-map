@@ -75,6 +75,12 @@ Route::middleware('auth')->group(function () {
 | หลังบ้าน
 */
 Route::middleware(['auth', 'active', 'idle', '2fa'])->prefix('admin')->group(function () {
+    Route::middleware('role:super-admin')->group(function () {
+        Route::get('/setup', [\App\Http\Controllers\Admin\SetupController::class, 'index'])->name('admin.setup');
+        Route::post('/setup/province', [\App\Http\Controllers\Admin\SetupController::class, 'selectProvince'])->name('admin.setup.province');
+        Route::post('/setup/basics', [\App\Http\Controllers\Admin\SetupController::class, 'saveBasics'])->name('admin.setup.basics');
+        Route::post('/setup/review', [\App\Http\Controllers\Admin\SetupController::class, 'saveReview'])->name('admin.setup.review');
+    });
     Route::get('/hosting', [\App\Http\Controllers\Admin\HostingController::class, 'index'])
         ->middleware('role:super-admin')->name('admin.hosting');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

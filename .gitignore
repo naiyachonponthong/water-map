@@ -19,3 +19,4 @@
 /output/public-home
 /output/public-weather
 /bootstrap/cache/*.php
+/output/qa
